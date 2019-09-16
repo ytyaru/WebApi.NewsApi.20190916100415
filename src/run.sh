@@ -21,10 +21,17 @@ is_not_today() {
 	updated="`date +"%Y-%m-%d" -r "${1}"`"
 	[ "$updated" = "`date +"%Y-%m-%d"`" ] && echo 'false' || echo 'true';
 }
+# $1: NewsApi結果JSONファイルパス
+format_json() {
+	local name="_`basename "$1"`"
+	local dir="`dirname "$1"`"
+	cat "${1}" | python3 -c 'import sys,json;print(json.dumps(json.loads(sys.stdin.read()),indent=4,ensure_ascii=False))' > "${dir%/}/${name}"
+}
 run() {
 	local TODAY_NEWS="${TODAY_NEWS:-TodayNews.json}"
 	[ 'false' = "`is_run "${TODAY_NEWS}"`" ] && exit 1;
 	echo "`request`" > "${TODAY_NEWS}"
+	format_json
 	cat "${TODAY_NEWS}"
 }
 run
